@@ -107,6 +107,7 @@ int main(void)
   RCC_GetClocksFreq(&RCC_Clocks);
   SysTick_Config(RCC_Clocks.HCLK_Frequency / 100);
   
+  printf("STM32F4 USB Audio \r\n");
 #if 0
   /* Enable Clock Security System(CSS): this will generate an NMI exception
   when HSE clock fails *****************************************************/
