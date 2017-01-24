@@ -373,7 +373,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER, USE_USB_OTG_FS, STM32F4XX,USB_AUDIO</Define>
               <Undefine></Undefine>
-              <IncludePath>..\inc;..\Libraries\STM32F4xx_StdPeriph_Driver\inc;..\Libraries\CMSIS\ST\STM32F4xx\Include;..\Utilities\STM32F4-Discovery;..\usb</IncludePath>
+              <IncludePath>..\inc;..\Libraries\STM32F4xx_StdPeriph_Driver\inc;..\Libraries\CMSIS\ST\STM32F4xx\Include;..\Utilities\STM32F4-Discovery;..\usb;..\Libraries\CMSIS\Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
