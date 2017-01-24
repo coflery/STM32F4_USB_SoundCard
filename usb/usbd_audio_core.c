@@ -82,6 +82,7 @@
 
 #include "usbd_audio_core.h"
 #include "usbd_audio_out_if.h"
+#include <stdio.h>
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
   * @{
@@ -569,6 +570,7 @@ static uint8_t  usbd_audio_DataOut (void *pdev, uint8_t epnum)
     {
       /* Enable start of Streaming */
       PlayFlag = 1;
+      printf("PlayFlag \r\n");
     }
   }
   

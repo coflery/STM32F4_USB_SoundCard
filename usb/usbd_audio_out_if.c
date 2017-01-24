@@ -33,6 +33,7 @@
 #include "stm32f4_discovery_lis302dl.h"
 
 #include <string.h>
+#include <stdio.h>
 
 extern int WavePlayerInit(uint32_t AudioFreq);
 extern void WavePlayBack(uint32_t AudioFreq);
@@ -134,7 +135,7 @@ static uint8_t  Init         (uint32_t AudioFreq,
                               uint32_t options)
 {
   static uint32_t Initialized = 0;
-  
+
   /* Check if the low layer has already been initialized */
   if (Initialized == 0)
   {
@@ -244,7 +245,7 @@ static uint8_t  AudioCmd(uint8_t* pbuf,
                          uint8_t cmd)
 {
   static int startPlay = 0;
-  //Tprintf("audio cmd: %x, %x\n", cmd, (int)AudioState);
+  //printf("audio cmd: %x, %x\n", cmd, (int)AudioState);
 
   /* Check the current state */
   if ((AudioState == AUDIO_STATE_INACTIVE) || (AudioState == AUDIO_STATE_ERROR))
@@ -289,6 +290,8 @@ static uint8_t  AudioCmd(uint8_t* pbuf,
 #if 1
       if ( ! startPlay)
       {
+//          printf("USB audio start play: %d inCurIndex: %d size: %d\r\n",
+//            startPlay, inCurIndex, (sizeof(sampleBuffer) / 4));
     	  //make sure to have enough data so that DMA can fill I2S FIFO completely, here half buffer filled
     	  if (inCurIndex >= (sizeof(sampleBuffer) / 4))
     	  {

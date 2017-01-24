@@ -297,7 +297,7 @@ void WavePlayerStop(void)
 * @retval None
 */
 int WavePlayerInit(uint32_t AudioFreq)
-{ 
+{
 #if 1
   /* MEMS Accelerometer configure to manage PAUSE, RESUME and Control Volume operation */
   Mems_Config();
