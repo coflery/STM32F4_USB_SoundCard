@@ -109,7 +109,8 @@
 #define AUDIO_OUTPUT_TERMINAL_DESC_SIZE               0x09
 #define AUDIO_STREAMING_INTERFACE_DESC_SIZE           0x07
 
-#define AUDIO_CONTROL_MUTE                            0x0001
+#define AUDIO_CONTROL_MUTE                            0x01
+#define AUDIO_CONTROL_VOLUME                          0x02
 
 #define AUDIO_FORMAT_TYPE_I                           0x01
 #define AUDIO_FORMAT_TYPE_III                         0x03

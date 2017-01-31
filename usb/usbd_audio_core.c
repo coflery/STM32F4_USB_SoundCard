@@ -291,7 +291,7 @@ static uint8_t usbd_audio_CfgDesc[AUDIO_CONFIG_DESC_SIZE] =
   AUDIO_INTERFACE_DESCRIPTOR_TYPE,      /* bDescriptorType */
   AUDIO_STREAMING_GENERAL,              /* bDescriptorSubtype */
   0x01,                                 /* 0x01: bTerminalLink */
-  0x00,                                 /* 0x01: bDelay */
+  0x01,                                 /* 0x01: bDelay */
   0x01,                                 /* wFormatTag AUDIO_FORMAT_PCM 0x0001*/
   0x00,
   /* 07 byte*/
@@ -590,7 +590,7 @@ static uint8_t  usbd_audio_SOF (void *pdev)
     In this function, a single variable (PlayFlag) is used to avoid software delays.
     The play operation must be executed as soon as possible after the SOF detection. */
   if (PlayFlag)
-  {      
+  {    
     /* Start playing received packet */
     AUDIO_OUT_fops.AudioCmd((uint8_t*)(IsocOutRdPtr),  /* Samples buffer pointer */
                             sAUDIO_OUT_PACKET,          /* Number of samples in Bytes */
@@ -608,7 +608,8 @@ static uint8_t  usbd_audio_SOF (void *pdev)
     
     /* If all available buffers have been consumed, stop playing */
     if (IsocOutRdPtr == IsocOutWrPtr)
-    {    
+    {
+      printf("Pause PlayFlag \r\n");
       /* Pause the audio stream */
       AUDIO_OUT_fops.AudioCmd((uint8_t*)(IsocOutBuff),   /* Samples buffer pointer */
                               sAUDIO_OUT_PACKET,          /* Number of samples in Bytes */

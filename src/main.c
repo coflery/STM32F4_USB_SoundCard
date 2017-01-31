@@ -20,6 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include <string.h>
 
 /** @addtogroup STM32F4-Discovery_Audio_Player_Recorder
   * @{
@@ -48,6 +49,14 @@
 __ALIGN_BEGIN USB_OTG_CORE_HANDLE  USB_OTG_dev __ALIGN_END;
 
 /* USB Audio */
+
+//extern int WavePlayerInit(uint32_t AudioFreq);
+//extern void WavePlayBack(uint32_t AudioFreq);
+//extern uint16_t AUDIO_SAMPLE[];
+///* Audio file size and start address are defined here since the audio file is 
+//    stored in Flash memory as a constant table of 16-bit data */
+//#define AUDIO_FILE_SZE          990000
+//#define AUIDO_START_ADDRESS     58 /* Offset relative to audio file header size */
 
 #include "usbd_audio_core.h"
 #include "usbd_audio_out_if.h"
@@ -86,6 +95,15 @@ void USBAudioInit(unsigned long UnsignedLongInteger)
 				  &AUDIO_cb,
 				  &USR_cb);
 }
+
+//extern uint16_t sampleBuffer[];
+
+//void I2S_Test()
+//{
+//  memset(sampleBuffer, 0xf9, (48*4) * 300);
+//  WavePlayerInit(48000);
+//  EVAL_AUDIO_Play(sampleBuffer,(48*4) * 300);
+//}
 
 /**
   * @brief  Main program.
@@ -128,6 +146,7 @@ int main(void)
 
 #ifdef USB_AUDIO
   USBAudioInit(0);
+//  I2S_Test();
 #endif
 
   while (1)

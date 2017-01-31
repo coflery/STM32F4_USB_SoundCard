@@ -356,11 +356,9 @@ uint32_t EVAL_AUDIO_Play(uint16_t* pBuffer, uint32_t Size)
 {
   /* Set the total number of data to be played (count in half-word) */
   AudioTotalSize = Size;
-
   /* Call the audio Codec Play function */
   Codec_Play();
   
-  printf("EVAL_AUDIO_Play\r\n");
   /* Update the Media layer and enable it for play */  
   Audio_MAL_Play((uint32_t)pBuffer, (uint32_t)(DMA_MAX(Size/4)));
   
@@ -563,7 +561,7 @@ static void Audio_MAL_IRQHandler(void)
   * @retval 0 if correct communication, else wrong communication
   */
 void Audio_MAL_I2S_IRQHandler(void)
-{ 
+{
   Audio_MAL_IRQHandler();
 }
 
@@ -1471,6 +1469,35 @@ static void Audio_MAL_Init(void)
 #endif
 }
 
+ void Audio_MAL_Init_2(void)  
+{ 
+  if (CurrAudioInterface == AUDIO_INTERFACE_I2S)
+  {    
+    /* Configure the DMA Stream */
+    DMA_DeInit(AUDIO_MAL_DMA_STREAM);
+    /* Set the parameters to be configured */
+    DMA_InitStructure.DMA_Channel = AUDIO_MAL_DMA_CHANNEL;  
+    DMA_InitStructure.DMA_PeripheralBaseAddr = AUDIO_MAL_DMA_DREG;
+    DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)0;      /* This field will be configured in play function */
+    DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+    DMA_InitStructure.DMA_BufferSize = (uint32_t)0xFFFE;      /* This field will be configured in play function */
+    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+    DMA_InitStructure.DMA_PeripheralDataSize = AUDIO_MAL_DMA_PERIPH_DATA_SIZE;
+    DMA_InitStructure.DMA_MemoryDataSize = AUDIO_MAL_DMA_MEM_DATA_SIZE; 
+    DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+    DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+    DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;         
+    DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_1QuarterFull;
+    DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+    DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;  
+    DMA_Init(AUDIO_MAL_DMA_STREAM, &DMA_InitStructure);  
+    
+    /* Enable the selected DMA interrupts (selected in "stm32f4_discovery_eval_audio_codec.h" defines) */
+    DMA_ITConfig(AUDIO_MAL_DMA_STREAM, DMA_IT_TC, ENABLE);    
+  }
+}
+
 /**
   * @brief  Restore default state of the used Media.
   * @param  None
@@ -1508,13 +1535,7 @@ static void Audio_MAL_DeInit(void)
 void Audio_MAL_Play(uint32_t Addr, uint32_t Size)
 {
   printf("Audio_MAL_Play\r\n");
-  /* If the I2S peripheral is still not enabled, enable it */
-  if ((CODEC_I2S->I2SCFGR & I2S_ENABLE_MASK) == 0)
-  {
-      printf("enable I2S \r\n");
-    I2S_Cmd(CODEC_I2S, ENABLE);
-  }
-  
+      
   if (CurrAudioInterface == AUDIO_INTERFACE_I2S)
   {
     /* Configure the buffer address and size */
@@ -1526,7 +1547,7 @@ void Audio_MAL_Play(uint32_t Addr, uint32_t Size)
 
     /* Enable the I2S DMA Stream*/
     DMA_Cmd(AUDIO_MAL_DMA_STREAM, ENABLE);   
-
+    printf("enable I2S DMA transfer \r\n");
   }
 #ifndef DAC_USE_I2S_DMA
   else
@@ -1543,6 +1564,11 @@ void Audio_MAL_Play(uint32_t Addr, uint32_t Size)
   }
 #endif /* DAC_USE_I2S_DMA */
 
+  /* If the I2S peripheral is still not enabled, enable it */
+  if ((CODEC_I2S->I2SCFGR & I2S_ENABLE_MASK) == 0)
+  {
+    I2S_Cmd(CODEC_I2S, ENABLE);
+  }
 }
 
 /**

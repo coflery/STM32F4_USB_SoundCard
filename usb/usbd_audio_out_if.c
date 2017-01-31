@@ -38,6 +38,7 @@
 extern int WavePlayerInit(uint32_t AudioFreq);
 extern void WavePlayBack(uint32_t AudioFreq);
 extern uint32_t AudioFlashPlay(uint16_t* pBuffer, uint32_t FullSize, uint32_t StartAdd);
+ extern void     Audio_MAL_Init_2(void);
 
 #if 1
 //make sure it is larger as I2S FIFO size
@@ -139,6 +140,7 @@ static uint8_t  Init         (uint32_t AudioFreq,
   /* Check if the low layer has already been initialized */
   if (Initialized == 0)
   {
+    printf("Init Wave play\r\n");
 	WavePlayerInit(I2S_AudioFreq_48k);
 
 #if 0
@@ -287,7 +289,7 @@ static uint8_t  AudioCmd(uint8_t* pbuf,
     	  inCurIndex = size / 2;
 #endif
       }
-#if 1
+
       if ( ! startPlay)
       {
 //          printf("USB audio start play: %d inCurIndex: %d size: %d\r\n",
@@ -295,14 +297,13 @@ static uint8_t  AudioCmd(uint8_t* pbuf,
     	  //make sure to have enough data so that DMA can fill I2S FIFO completely, here half buffer filled
     	  if (inCurIndex >= (sizeof(sampleBuffer) / 4))
     	  {
+              Audio_MAL_Init_2();
     		  EVAL_AUDIO_Play(sampleBuffer, sizeof(sampleBuffer));
-    		  startPlay = 1;
+               
+              inCurIndex = 0;
+    		  startPlay = 0;
     	  }
       }
-#else
-      WavePlayBack(I2S_AudioFreq_48k);
-      ////AudioFlashPlay((uint16_t*)sampleBuffer, sizeof(sampleBuffer), 0);
-#endif
 
       return AUDIO_OK;
     }
