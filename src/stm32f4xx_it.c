@@ -40,7 +40,6 @@ __IO uint8_t PauseResumeStatus = 2, Count = 0, LED_Toggle = 0;
 uint16_t capture = 0;
 extern __IO uint16_t CCR_Val;
 extern __IO uint8_t RepeatState, AudioPlayStart;
-extern uint8_t Buffer[];
 
 #if defined MEDIA_USB_KEY
 __IO uint16_t Time_Rec_Base = 0;
@@ -278,13 +277,9 @@ void EXTI1_IRQHandler(void)
   */
 void TIM4_IRQHandler(void)
 {
-   uint8_t clickreg = 0;
-
   if (AudioPlayStart != 0x00)
   {
     /* Read click status register */
-    LIS302DL_Read(&clickreg, LIS302DL_CLICK_SRC_REG_ADDR, 1); 
-    LIS302DL_Read(Buffer, LIS302DL_STATUS_REG_ADDR, 6);
   }
   
   /* Checks whether the TIM interrupt has occurred */

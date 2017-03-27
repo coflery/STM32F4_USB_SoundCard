@@ -36,10 +36,7 @@
 #include <stdio.h>
 
 extern int WavePlayerInit(uint32_t AudioFreq);
-extern uint32_t AudioFlashPlay(uint16_t* pBuffer, uint32_t FullSize, uint32_t StartAdd);
- extern void     Audio_MAL_Init_2(void);
 
-#if 1
 //make sure it is larger as I2S FIFO size
 #ifdef I2S_24BIT
 uint16_t sampleBuffer[((48*8) * 200) / 2];	//sample frequency (1 packet per ms) times format (bytes)
@@ -47,7 +44,6 @@ uint16_t sampleBuffer[((48*8) * 200) / 2];	//sample frequency (1 packet per ms) 
 uint16_t sampleBuffer[((48*4) * 300) / 2];	//sample frequency (1 packet per ms) times format (bytes)
 #endif
 int inCurIndex = 0;
-#endif
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
   * @{
@@ -139,17 +135,8 @@ static uint8_t  Init         (uint32_t AudioFreq,
   /* Check if the low layer has already been initialized */
   if (Initialized == 0)
   {
-    printf("Init Wave play\r\n");
 	WavePlayerInit(I2S_AudioFreq_48k);
 
-#if 0
-    /* Call low layer function */
-    if (EVAL_AUDIO_Init(OUTPUT_DEVICE_AUTO, Volume, AudioFreq) != 0)
-    {
-      AudioState = AUDIO_STATE_ERROR;
-      return AUDIO_FAIL;
-    }
-#endif
     /* Set the Initialization flag to prevent reinitializing the interface again */
     Initialized = 1;
   }
@@ -175,9 +162,6 @@ static uint8_t  DeInit       (uint32_t options)
 }
 
 #ifdef I2S_24BIT
-
-//extern void __disable_irq(void);
-//extern void __enable_irq(void);
 
 static int convertTo24Bit(register uint16_t *outBuf, register uint8_t *inBuf, register int size)
 {
@@ -278,6 +262,7 @@ static uint8_t  AudioCmd(uint8_t* pbuf,
       }
       else
       {
+
 #ifdef I2S_24BIT
     	  //for 24bit we have to reorder, 16bit Little Endian words assumed for I2S DMA
     	  //word  0x8EAA33 must become 0x33008EAA or as bytes:
@@ -291,12 +276,9 @@ static uint8_t  AudioCmd(uint8_t* pbuf,
 
       if ( ! startPlay)
       {
-//          printf("USB audio start play: %d inCurIndex: %d size: %d\r\n",
-//            startPlay, inCurIndex, (sizeof(sampleBuffer) / 4));
     	  //make sure to have enough data so that DMA can fill I2S FIFO completely, here half buffer filled
     	  if (inCurIndex >= (sizeof(sampleBuffer) / 4))
     	  {
-              Audio_MAL_Init_2();
     		  EVAL_AUDIO_Play(sampleBuffer, sizeof(sampleBuffer));
                
               inCurIndex = 0;
@@ -396,15 +378,13 @@ static uint8_t  AudioCmd(uint8_t* pbuf,
   */
 static uint8_t  VolumeCtl    (uint8_t vol)
 {
-	//UART_putString("VolumeCtl\n");
-#if 1
+  //UART_putString("VolumeCtl\n");
   /* Call low layer volume setting function */  
   if (EVAL_AUDIO_VolumeCtl(vol) != 0)
   {
     AudioState = AUDIO_STATE_ERROR;
     return AUDIO_FAIL;
   }
-#endif
   
   return AUDIO_OK;
 }
@@ -419,14 +399,12 @@ static uint8_t  MuteCtl      (uint8_t cmd)
 {
 	//UART_putString("MuteCtl\n");
 
-#if 1
   /* Call low layer mute setting function */  
   if (EVAL_AUDIO_Mute(cmd) != 0)
   {
     AudioState = AUDIO_STATE_ERROR;
     return AUDIO_FAIL;
   }
-#endif
   
   return AUDIO_OK;
 }

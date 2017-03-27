@@ -35,7 +35,6 @@ extern int inCurIndex;
 __IO uint8_t volume = 80;
 __IO uint8_t AudioPlayStart = 0;
 static __IO uint32_t TimingDelay;
-uint8_t Buffer[6];
 
 /**
 * @brief  Initializes the wave player
@@ -48,7 +47,7 @@ int WavePlayerInit(uint32_t AudioFreq)
   EVAL_AUDIO_SetAudioInterface(AUDIO_INTERFACE_I2S);
   
   /* Initialize the Audio codec and all related peripherals (I2S, I2C, IOExpander, IOs...) */  
-  EVAL_AUDIO_Init(OUTPUT_DEVICE_AUTO, volume, AudioFreq ); 
+  EVAL_AUDIO_Init(OUTPUT_DEVICE_AUTO, volume, AudioFreq); 
 
   return 0;
 }
@@ -87,24 +86,6 @@ void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size)
   /* Check if the end of file has been reached */
   
 #ifdef AUDIO_MAL_MODE_NORMAL  
-  
-#if defined MEDIA_IntFLASH
-
-#if defined PLAY_REPEAT_OFF
-  LED_Toggle = 4;
-  RepeatState = 1;
-  EVAL_AUDIO_Stop(CODEC_PDWN_HW);
-#else
-  /* Replay from the beginning */
-  EVAL_AUDIO_Play((uint16_t*)sampleBuffer, sizeof(sampleBuffer));
-#endif  
-  
-#elif defined MEDIA_USB_KEY  
-  XferCplt = 1;
-  if (WaveDataLength) WaveDataLength -= _MAX_SS;
-  if (WaveDataLength < _MAX_SS) WaveDataLength = 0;
-    
-#endif 
     
 #else /* #ifdef AUDIO_MAL_MODE_CIRCULAR */
   
