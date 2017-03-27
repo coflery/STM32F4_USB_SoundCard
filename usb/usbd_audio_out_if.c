@@ -36,7 +36,6 @@
 #include <stdio.h>
 
 extern int WavePlayerInit(uint32_t AudioFreq);
-extern void WavePlayBack(uint32_t AudioFreq);
 extern uint32_t AudioFlashPlay(uint16_t* pBuffer, uint32_t FullSize, uint32_t StartAdd);
  extern void     Audio_MAL_Init_2(void);
 

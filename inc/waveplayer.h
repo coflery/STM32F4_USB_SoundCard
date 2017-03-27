@@ -82,7 +82,6 @@ typedef enum
 /* Exported functions ------------------------------------------------------- */
 void TimingDelay_Decrement(void);
 void Delay(__IO uint32_t nTime);
-void WavePlayBack(uint32_t AudioFreq);
 uint32_t AudioFlashPlay(uint16_t* pBuffer, uint32_t FullSize, uint32_t StartAdd);
 int WavePlayerInit(uint32_t AudioFreq);
 void WavePlayerStop(void);

@@ -417,11 +417,6 @@
           <GroupName>APP</GroupName>
           <Files>
             <File>
-              <FileName>audio_sample.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\src\audio_sample.c</FilePath>
-            </File>
-            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\main.c</FilePath>
@@ -440,11 +435,6 @@
               <FileName>waveplayer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\waveplayer.c</FilePath>
-            </File>
-            <File>
-              <FileName>waverecorder.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\src\waverecorder.c</FilePath>
             </File>
           </Files>
         </Group>
