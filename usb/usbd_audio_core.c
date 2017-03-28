@@ -137,8 +137,7 @@ static uint8_t  usbd_audio_OUT_Incplt (void  *pdev);
 /*********************************************
    AUDIO Requests management functions
  *********************************************/
-static void AUDIO_Req_GetCurrent(void *pdev, USB_SETUP_REQ *req);
-static void AUDIO_Req_SetCurrent(void *pdev, USB_SETUP_REQ *req);
+static void AUDIO_Req_FeatureUnit(void *pdev, USB_SETUP_REQ *req);
 static uint8_t  *USBD_audio_GetCfgDesc (uint8_t speed, uint16_t *length);
 /**
   * @}
@@ -156,6 +155,7 @@ uint8_t* IsocOutRdPtr = IsocOutBuff;
 uint8_t  AudioCtl[64];
 uint8_t  AudioCtlCmd = 0;
 uint32_t AudioCtlLen = 0;
+uint8_t  AudioCtlCS  = 0;
 uint8_t  AudioCtlUnit = 0;
 
 static uint32_t PlayFlag = 0;
@@ -243,7 +243,8 @@ static uint8_t usbd_audio_CfgDesc[AUDIO_CONFIG_DESC_SIZE] =
   AUDIO_OUT_STREAMING_CTRL,             /* bUnitID */
   0x01,                                 /* bSourceID */
   0x01,                                 /* bControlSize */
-  AUDIO_CONTROL_MUTE,                   /* bmaControls(0) */
+  AUDIO_CONTROL_MUTE                    /* bmaControls(0) */
+  | AUDIO_CONTROL_VOLUME,               
   0x00,                                 /* bmaControls(1) */
   0x00,                                 /* iTerminal */
   /* 09 byte*/
@@ -437,20 +438,9 @@ static uint8_t  usbd_audio_Setup (void  *pdev,
   switch (req->bmRequest & USB_REQ_TYPE_MASK)
   {
     /* AUDIO Class Requests -------------------------------*/
-  case USB_REQ_TYPE_CLASS :    
-    switch (req->bRequest)
-    {
-    case AUDIO_REQ_GET_CUR:
-      AUDIO_Req_GetCurrent(pdev, req);
-      break;
-      
-    case AUDIO_REQ_SET_CUR:
-      AUDIO_Req_SetCurrent(pdev, req);   
-      break;
-
-    default:
-      USBD_CtlError (pdev, req);
-      return USBD_FAIL;
+  case USB_REQ_TYPE_CLASS :
+    if (HIBYTE(req->wIndex) == 0x2) {
+        AUDIO_Req_FeatureUnit(pdev, req);
     }
     break;
     
@@ -510,8 +500,11 @@ static uint8_t  usbd_audio_EP0_RxReady (void  *pdev)
     /* Check for which addressed unit the AudioControl request has been issued */
     if (AudioCtlUnit == AUDIO_OUT_STREAMING_CTRL)
     {/* In this driver, to simplify code, only one unit is managed */
-      /* Call the audio interface mute function */
-      AUDIO_OUT_fops.MuteCtl(AudioCtl[0]);
+        if (AudioCtlCS == AUDIO_CONTROL_VOLUME) {
+            AUDIO_OUT_fops.VolumeCtl(AudioCtl[0]);
+        } else if (AudioCtlCS == AUDIO_CONTROL_MUTE) {
+            AUDIO_OUT_fops.MuteCtl(AudioCtl[0]);
+        }
       
       /* Reset the AudioCtlCmd variable to prevent re-entering this function */
       AudioCtlCmd = 0;
@@ -570,7 +563,6 @@ static uint8_t  usbd_audio_DataOut (void *pdev, uint8_t epnum)
     {
       /* Enable start of Streaming */
       PlayFlag = 1;
-      printf("PlayFlag \r\n");
     }
   }
   
@@ -609,7 +601,6 @@ static uint8_t  usbd_audio_SOF (void *pdev)
     /* If all available buffers have been consumed, stop playing */
     if (IsocOutRdPtr == IsocOutWrPtr)
     {
-      printf("Pause PlayFlag \r\n");
       /* Pause the audio stream */
       AUDIO_OUT_fops.AudioCmd((uint8_t*)(IsocOutBuff),   /* Samples buffer pointer */
                               sAUDIO_OUT_PACKET,          /* Number of samples in Bytes */
@@ -638,45 +629,95 @@ static uint8_t  usbd_audio_OUT_Incplt (void  *pdev)
   return USBD_OK;
 }
 
+
 /******************************************************************************
      AUDIO Class requests management
 ******************************************************************************/
-/**
-  * @brief  AUDIO_Req_GetCurrent
-  *         Handles the GET_CUR Audio control request.
-  * @param  pdev: instance
-  * @param  req: setup class request
-  * @retval status
-  */
-static void AUDIO_Req_GetCurrent(void *pdev, USB_SETUP_REQ *req)
-{  
-  /* Send the current mute state */
-  USBD_CtlSendData (pdev, 
+static void AUDIO_Req_FeatureUnit(void *pdev, USB_SETUP_REQ *req)
+{
+  uint8_t bCS = HIBYTE(req->wValue);
+  uint8_t bCN = LOBYTE(req->wValue);
+  
+  if (bCS == AUDIO_CONTROL_VOLUME && bCN == 0) {
+    switch (req->bRequest) {
+        case AUDIO_REQ_GET_CUR:
+          AudioCtl[0] = 50;
+          break;
+
+        case AUDIO_REQ_GET_MAX:
+          AudioCtl[0] = 100;
+          break;
+        
+        case AUDIO_REQ_GET_MIN:
+          AudioCtl[0] = 0;
+          break;
+        
+        case AUDIO_REQ_GET_RES:
+          AudioCtl[0] = 1;
+          break;
+        
+        case AUDIO_REQ_SET_CUR:
+          if (req->wLength)
+          {
+            /* Prepare the reception of the buffer over EP0 */
+            USBD_CtlPrepareRx (pdev, 
                     AudioCtl,
                     req->wLength);
-}
-
-/**
-  * @brief  AUDIO_Req_SetCurrent
-  *         Handles the SET_CUR Audio control request.
-  * @param  pdev: instance
-  * @param  req: setup class request
-  * @retval status
-  */
-static void AUDIO_Req_SetCurrent(void *pdev, USB_SETUP_REQ *req)
-{ 
-  if (req->wLength)
-  {
-    /* Prepare the reception of the buffer over EP0 */
-    USBD_CtlPrepareRx (pdev, 
-                       AudioCtl,
-                       req->wLength);
     
-    /* Set the global variables indicating current request and its length 
-    to the function usbd_audio_EP0_RxReady() which will process the request */
-    AudioCtlCmd = AUDIO_REQ_SET_CUR;     /* Set the request value */
-    AudioCtlLen = req->wLength;          /* Set the request data length */
-    AudioCtlUnit = HIBYTE(req->wIndex);  /* Set the request target unit */
+            /* Set the global variables indicating current request and its length 
+            to the function usbd_audio_EP0_RxReady() which will process the request */
+            AudioCtlCmd = AUDIO_REQ_SET_CUR;     /* Set the request value */
+            AudioCtlLen = req->wLength;          /* Set the request data length */
+            AudioCtlCS  = bCS;
+            AudioCtlUnit = HIBYTE(req->wIndex);  /* Set the request target unit */
+          }
+          break;  
+
+        case AUDIO_REQ_SET_MAX:
+          break;
+        
+        case AUDIO_REQ_SET_MIN:
+          break;
+
+        case AUDIO_REQ_SET_RES:
+          break;
+        
+        default:
+          USBD_CtlError (pdev, req);
+          return;
+    }
+  } else if (bCS == AUDIO_CONTROL_MUTE && bCN == 0) {
+    switch (req->bRequest) {
+        case AUDIO_REQ_GET_CUR:
+          AudioCtl[0] = 0;
+          break;
+        case AUDIO_REQ_SET_CUR:
+          if (req->wLength)
+          {
+            /* Prepare the reception of the buffer over EP0 */
+            USBD_CtlPrepareRx (pdev, 
+                    AudioCtl,
+                    req->wLength);
+    
+            /* Set the global variables indicating current request and its length 
+            to the function usbd_audio_EP0_RxReady() which will process the request */
+            AudioCtlCmd = AUDIO_REQ_SET_CUR;     /* Set the request value */
+            AudioCtlLen = req->wLength;          /* Set the request data length */
+            AudioCtlCS  = bCS;
+            AudioCtlUnit = HIBYTE(req->wIndex);  /* Set the request target unit */
+          }
+          break;
+        
+        default:
+          USBD_CtlError (pdev, req);
+          return;
+    }
+  }
+
+  if (req->bRequest & AUDIO_REQ_GET_MASK) {
+      USBD_CtlSendData (pdev, 
+                        AudioCtl,
+                        req->wLength);    
   }
 }
 

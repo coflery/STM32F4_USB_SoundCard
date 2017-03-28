@@ -808,7 +808,7 @@ static uint32_t Codec_Stop(uint32_t CodecPdwnMode)
 static uint32_t Codec_VolumeCtrl(uint8_t Volume)
 {
   uint32_t counter = 0;
-  
+    printf("Codec: volume: %d \r\n", Volume);
   if (Volume > 0xE6)
   {
     /* Set the Master volume */
