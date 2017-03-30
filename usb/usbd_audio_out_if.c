@@ -282,7 +282,7 @@ static uint8_t  AudioCmd(uint8_t* pbuf,
     	  //make sure to have enough data so that DMA can fill I2S FIFO completely, here half buffer filled
     	  if (inCurIndex >= (sizeof(sampleBuffer) / 4))
     	  {
-    		  EVAL_AUDIO_Play(sampleBuffer, sizeof(sampleBuffer));
+    		  EVAL_AUDIO_Play(sampleBuffer, inCurIndex * 2);
                
               inCurIndex = 0;
     		  startPlay = 0;

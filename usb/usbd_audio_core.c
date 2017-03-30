@@ -548,15 +548,11 @@ static uint8_t  usbd_audio_DataIn (void *pdev, uint8_t epnum)
 static uint8_t  usbd_audio_DataOut (void *pdev, uint8_t epnum)
 {     
   if (epnum == AUDIO_OUT_EP)
-  {    
+  {
     /* Increment the Buffer pointer or roll it back when all buffers are full */
     if (IsocOutWrPtr >= (IsocOutBuff + (sAUDIO_OUT_PACKET * OUT_PACKET_NUM)))
     {/* All buffers are full: roll back */
       IsocOutWrPtr = IsocOutBuff;
-    }
-    else
-    {/* Increment the buffer pointer */
-      IsocOutWrPtr += sAUDIO_OUT_PACKET;
     }
     
     /* Toggle the frame index */  
@@ -568,7 +564,10 @@ static uint8_t  usbd_audio_DataOut (void *pdev, uint8_t epnum)
                      AUDIO_OUT_EP,
                      (uint8_t*)(IsocOutWrPtr),
                      sAUDIO_OUT_PACKET);
-      
+
+    /* Increment the buffer pointer */
+    IsocOutWrPtr += sAUDIO_OUT_PACKET;
+    
     /* Trigger the start of streaming only when half buffer is full */
     if ((PlayFlag == 0) && (IsocOutWrPtr >= (IsocOutBuff + ((sAUDIO_OUT_PACKET * OUT_PACKET_NUM) / 2))))
     {
@@ -594,20 +593,17 @@ static uint8_t  usbd_audio_SOF (void *pdev)
     The play operation must be executed as soon as possible after the SOF detection. */
   if (PlayFlag)
   {    
-    /* Start playing received packet */
-    AUDIO_OUT_fops.AudioCmd((uint8_t*)(IsocOutRdPtr),  /* Samples buffer pointer */
-                            sAUDIO_OUT_PACKET,          /* Number of samples in Bytes */
-                            AUDIO_CMD_PLAY);           /* Command to be processed */
-    
     /* Increment the Buffer pointer or roll it back when all buffers all full */  
     if (IsocOutRdPtr >= (IsocOutBuff + (sAUDIO_OUT_PACKET * OUT_PACKET_NUM)))
     {/* Roll back to the start of buffer */
       IsocOutRdPtr = IsocOutBuff;
     }
-    else
-    {/* Increment to the next sub-buffer */
-      IsocOutRdPtr += sAUDIO_OUT_PACKET;
-    }
+    /* Start playing received packet */
+    AUDIO_OUT_fops.AudioCmd((uint8_t*)(IsocOutRdPtr),  /* Samples buffer pointer */
+                            sAUDIO_OUT_PACKET,          /* Number of samples in Bytes */
+                            AUDIO_CMD_PLAY);           /* Command to be processed */
+    /* Increment to the next sub-buffer */
+    IsocOutRdPtr += sAUDIO_OUT_PACKET;
     
     /* If all available buffers have been consumed, stop playing */
     if (IsocOutRdPtr == IsocOutWrPtr)
