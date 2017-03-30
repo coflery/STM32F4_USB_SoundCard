@@ -82,6 +82,7 @@
 
 #include "usbd_audio_core.h"
 #include "usbd_audio_out_if.h"
+#include "stm32f4_discovery_audio_codec.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -479,7 +480,7 @@ static uint8_t  usbd_audio_Setup (void  *pdev,
             if ((uint8_t)(req->wValue) == 0) {
                 STM_EVAL_LEDOff(LED6);
                 STM_EVAL_LEDOn(LED3);
-            } else {
+            } else if ((uint8_t)(req->wValue) == 1) {
                 STM_EVAL_LEDOff(LED3);
                 STM_EVAL_LEDOn(LED6);
             }

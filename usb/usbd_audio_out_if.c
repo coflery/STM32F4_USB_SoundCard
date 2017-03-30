@@ -249,6 +249,9 @@ static uint8_t  AudioCmd(uint8_t* pbuf,
        (AudioState == AUDIO_STATE_PLAYING) || \
        (AudioState == AUDIO_STATE_PAUSED))
     {
+      if (AudioState != AUDIO_STATE_PLAYING) {
+        EVAL_AUDIO_PauseResume(AUDIO_RESUME);
+      }
       AudioState = AUDIO_STATE_PLAYING;
 
       if (inCurIndex < (sizeof(sampleBuffer) / 2))
@@ -288,81 +291,30 @@ static uint8_t  AudioCmd(uint8_t* pbuf,
 
       return AUDIO_OK;
     }
-
-    /* If current state is Paused */
-    else if (AudioState == AUDIO_STATE_PAUSED)
-    {
-#if 0
-      //if (EVAL_AUDIO_PauseResume(AUDIO_RESUME, (uint32_t)pbuf, (size/2)) != 0)
-      if (EVAL_AUDIO_PauseResume(AUDIO_RESUME) != 0)
-      {
-        AudioState = AUDIO_STATE_ERROR;
-        return AUDIO_FAIL;
-      }
-      else
-#endif
-      {
-        AudioState = AUDIO_STATE_PLAYING;
-        return AUDIO_OK;
-      } 
-    } 
     else /* Not allowed command */
     {
       return AUDIO_FAIL;
     }
     
     /* Process the STOP command ----------------------------*/
-  case AUDIO_CMD_STOP:
-    if (AudioState != AUDIO_STATE_PLAYING)
-    {
-      /* Unsupported command */
-      return AUDIO_FAIL;
-    }
-    else
-#if 0
-    	if (EVAL_AUDIO_Stop(CODEC_PDWN_SW) != 0)
-    	{
-    		AudioState = AUDIO_STATE_ERROR;
-    		return AUDIO_FAIL;
-    	}
-    	else
-#endif
-    	{
-    		if (AudioState == AUDIO_STATE_PLAYING)
-    		{
-    			memset(sampleBuffer, 0, sizeof(sampleBuffer));
-    			inCurIndex = 0;
-    		}
-    		AudioState = AUDIO_STATE_STOPPED;
-    		return AUDIO_OK;
-    	}
-  
     /* Process the PAUSE command ---------------------------*/
+  case AUDIO_CMD_STOP:
   case AUDIO_CMD_PAUSE:
     if (AudioState != AUDIO_STATE_PLAYING)
     {
       /* Unsupported command */
       return AUDIO_FAIL;
+    } else {
+        if (AudioState == AUDIO_STATE_PLAYING)
+        {
+            EVAL_AUDIO_PauseResume(AUDIO_PAUSE);
+            memset(sampleBuffer, 0, sizeof(sampleBuffer));
+            inCurIndex = 0;
+
+        }
+        AudioState = AUDIO_STATE_PAUSED;
+        return AUDIO_OK;
     }
-    else
-#if 0
-    	//if (EVAL_AUDIO_PauseResume(AUDIO_PAUSE, (uint32_t)pbuf, (size/2)) != 0)
-    	if (EVAL_AUDIO_PauseResume(AUDIO_PAUSE) != 0)
-    	{
-    		AudioState = AUDIO_STATE_ERROR;
-    		return AUDIO_FAIL;
-    	}
-    	else
-#endif
-    	{
-    		if (AudioState == AUDIO_STATE_PLAYING)
-    		{
-    			memset(sampleBuffer, 0, sizeof(sampleBuffer));
-    			inCurIndex = 0;
-    		}
-    		AudioState = AUDIO_STATE_PAUSED;
-    		return AUDIO_OK;
-    	}
     
     /* Unsupported command ---------------------------------*/
   default:
