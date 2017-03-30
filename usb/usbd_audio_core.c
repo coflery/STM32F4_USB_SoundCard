@@ -83,6 +83,7 @@
 #include "usbd_audio_core.h"
 #include "usbd_audio_out_if.h"
 #include <stdio.h>
+#include <string.h>
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
   * @{
@@ -474,6 +475,15 @@ static uint8_t  usbd_audio_Setup (void  *pdev,
       if ((uint8_t)(req->wValue) < AUDIO_TOTAL_IF_NUM)
       {
         usbd_audio_AltSet = (uint8_t)(req->wValue);
+        if ((uint8_t)(req->wIndex) == 1) {
+            if ((uint8_t)(req->wValue) == 0) {
+                STM_EVAL_LEDOff(LED6);
+                STM_EVAL_LEDOn(LED3);
+            } else {
+                STM_EVAL_LEDOff(LED3);
+                STM_EVAL_LEDOn(LED6);
+            }
+        }
       }
       else
       {
@@ -638,6 +648,7 @@ static void AUDIO_Req_FeatureUnit(void *pdev, USB_SETUP_REQ *req)
   uint8_t bCS = HIBYTE(req->wValue);
   uint8_t bCN = LOBYTE(req->wValue);
   
+  memset(AudioCtl, 0, sizeof(AudioCtl));
   if (bCS == AUDIO_CONTROL_VOLUME && bCN == 0) {
     switch (req->bRequest) {
         case AUDIO_REQ_GET_CUR:

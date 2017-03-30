@@ -33,7 +33,6 @@ extern int inCurIndex;
 
 //use just the minimum needed
 __IO uint8_t volume = 80;
-__IO uint8_t AudioPlayStart = 0;
 static __IO uint32_t TimingDelay;
 
 /**
