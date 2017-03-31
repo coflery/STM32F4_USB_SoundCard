@@ -57,15 +57,15 @@
 //#define I2S_INTERRUPT                 /* Uncomment this line to enable audio transfert with I2S interrupt*/ 
 
 /* Audio Transfer mode (DMA, Interrupt or Polling) */
-#define AUDIO_MAL_MODE_NORMAL         /* Uncomment this line to enable the audio 
+#define AUDIO_MAL_MODE_NORMAL           /* Uncomment this line to enable the audio 
                                          Transfer using DMA */
-/* #define AUDIO_MAL_MODE_CIRCULAR */ /* Uncomment this line to enable the audio 
+/*#define AUDIO_MAL_MODE_CIRCULAR*/         /* Uncomment this line to enable the audio 
                                          Transfer using DMA */
 
 /* For the DMA modes select the interrupt that will be used */
 #define AUDIO_MAL_DMA_IT_TC_EN        /* Uncomment this line to enable DMA Transfer Complete interrupt */
 /* #define AUDIO_MAL_DMA_IT_HT_EN */  /* Uncomment this line to enable DMA Half Transfer Complete interrupt */
-#define AUDIO_MAL_DMA_IT_TE_EN  /* Uncomment this line to enable DMA Transfer Error interrupt */
+#define AUDIO_MAL_DMA_IT_TE_EN        /* Uncomment this line to enable DMA Transfer Error interrupt */
 
 /* Select the interrupt preemption priority and subpriority for the DMA interrupt */
 #define EVAL_AUDIO_IRQ_PREPRIO           0   /* Select the preemption priority level(0 is the highest) */
@@ -260,24 +260,6 @@ void DAC_Config(void);
 
 /* User Callbacks: user has to implement these functions in his code if
   they are needed. -----------------------------------------------------------*/
-
-uint16_t EVAL_AUDIO_GetSampleCallBack(void);
-
-/* This function is called when the requested data has been completely transferred.
-   In Normal mode (when  the define AUDIO_MAL_MODE_NORMAL is enabled) this function
-   is called at the end of the whole audio file.
-   In circular mode (when  the define AUDIO_MAL_MODE_CIRCULAR is enabled) this 
-   function is called at the end of the current buffer transmission. */
-void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size);
-
-/* This function is called when half of the requested buffer has been transferred 
-   This callback is useful in Circular mode only (when AUDIO_MAL_MODE_CIRCULAR 
-   define is enabled)*/
-void EVAL_AUDIO_HalfTransfer_CallBack(uint32_t pBuffer, uint32_t Size);
-
-/* This function is called when an Interrupt due to transfer error on or peripheral
-   error occurs. */
-void EVAL_AUDIO_Error_CallBack(void* pData);
 
 /* Codec_TIMEOUT_UserCallback() function is called whenever a timeout condition 
    occurs during communication (waiting on an event that doesn't occur, bus 

@@ -24,13 +24,6 @@
 
 #include <string.h>
 
-#ifdef I2S_24BIT
-extern uint16_t sampleBuffer[((48*8) * 200) / 2];	//sample frequency (1 packet per ms) times format (bytes)
-#else
-extern uint16_t sampleBuffer[((48*4) * 300) / 2];	//sample frequency (1 packet per ms) times format (bytes)
-#endif
-extern int inCurIndex;
-
 //use just the minimum needed
 __IO uint8_t volume = 80;
 static __IO uint32_t TimingDelay;
@@ -51,6 +44,8 @@ int WavePlayerInit(uint32_t AudioFreq)
   return 0;
 }
 
+/*----------------------------------------------------------------------------*/
+
 /**
   * @brief  MEMS accelerometer management of the timeout situation.
   * @param  None.
@@ -60,61 +55,15 @@ uint32_t LIS302DL_TIMEOUT_UserCallback(void)
 {
   /* MEMS Accelerometer Timeout error occured */
   while (1)
-  {   
+  {
   }
 }
 
-/*--------------------------------
-Callbacks implementation:
-the callbacks prototypes are defined in the stm324xg_eval_audio_codec.h file
-and their implementation should be done in the user code if they are needed.
-Below some examples of callback implementations.
---------------------------------------------------------*/
 
-/**
-* @brief  Calculates the remaining file size and new position of the pointer.
-* @param  None
-* @retval None
-*/
-void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size)
-{
-  /* Calculate the remaining audio data in the file and the new size 
-  for the DMA transfer. If the Audio files size is less than the DMA max 
-  data transfer size, so there is no calculation to be done, just restart 
-  from the beginning of the file ... */
-  /* Check if the end of file has been reached */
-  
-#ifdef AUDIO_MAL_MODE_NORMAL  
-    
-#else /* #ifdef AUDIO_MAL_MODE_CIRCULAR */
-  
-  
-#endif /* AUDIO_MAL_MODE_CIRCULAR */
-}
-
-/**
-* @brief  Get next data sample callback
-* @param  None
-* @retval Next data sample to be sent
-*/
-uint16_t EVAL_AUDIO_GetSampleCallBack(void)
-{
-  return 0;
-}
-
-#ifndef USE_DEFAULT_TIMEOUT_CALLBACK
-/**
-  * @brief  Basic management of the timeout situation.
-  * @param  None.
-  * @retval None.
-  */
 uint32_t Codec_TIMEOUT_UserCallback(void)
-{   
-  return (0);
+{
+    return (0);
 }
-#endif /* USE_DEFAULT_TIMEOUT_CALLBACK */
-
-/*----------------------------------------------------------------------------*/
 
 /**
   * @brief  Inserts a delay time.

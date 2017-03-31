@@ -361,7 +361,7 @@ uint32_t EVAL_AUDIO_Play(uint16_t* pBuffer, uint32_t Size)
   
   /* Update the Media layer and enable it for play */  
   Audio_MAL_Play((uint32_t)pBuffer, (uint32_t)(DMA_MAX(AudioTotalSize)));
-  
+
   /* Update the remaining number of data to be played */
   AudioRemSize = AudioTotalSize - DMA_MAX(AudioTotalSize);
   
@@ -471,13 +471,11 @@ static void Audio_MAL_IRQHandler(void)
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TC) != RESET)
   {         
  #ifdef AUDIO_MAL_MODE_NORMAL
-    /* Check if the end of file has been reached */
     if (AudioRemSize > 0)
     {      
       /* Wait the DMA Stream to be effectively disabled */
       while (DMA_GetCmdStatus(AUDIO_MAL_DMA_STREAM) != DISABLE)
       {}
-      
       /* Clear the Interrupt flag */
       DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TC); 
            
@@ -504,20 +502,11 @@ static void Audio_MAL_IRQHandler(void)
     {
       /* Disable the I2S DMA Stream*/
       DMA_Cmd(AUDIO_MAL_DMA_STREAM, DISABLE);   
-      
       /* Clear the Interrupt flag */
-      DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TC);       
-      
-      /* Manage the remaining file size and new address offset: This function 
-      should be coded by user (its prototype is already declared in stm32f4_discovery_audio_codec.h) */  
-      EVAL_AUDIO_TransferComplete_CallBack((uint32_t)CurrentPos, 0);       
+      DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TC);
     }
     
- #elif defined(AUDIO_MAL_MODE_CIRCULAR)
-    /* Manage the remaining file size and new address offset: This function 
-       should be coded by user (its prototype is already declared in stm32f4_discovery_audio_codec.h) */  
-    EVAL_AUDIO_TransferComplete_CallBack(pAddr, Size);    
-    
+ #elif defined(AUDIO_MAL_MODE_CIRCULAR)    
     /* Clear the Interrupt flag */
     DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TC);
  #endif /* AUDIO_MAL_MODE_NORMAL */  
@@ -528,10 +517,6 @@ static void Audio_MAL_IRQHandler(void)
   /* Half Transfer complete interrupt */
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_HT) != RESET)
   {
-    /* Manage the remaining file size and new address offset: This function 
-       should be coded by user (its prototype is already declared in stm32f4_discovery_audio_codec.h) */  
-    EVAL_AUDIO_HalfTransfer_CallBack((uint32_t)pAddr, Size);    
-   
     /* Clear the Interrupt flag */
     DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_HT);    
   }
@@ -544,10 +529,6 @@ static void Audio_MAL_IRQHandler(void)
      (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_DME) != RESET))
     
   {
-    /* Manage the error generated on DMA FIFO: This function 
-       should be coded by user (its prototype is already declared in stm32f4_discovery_audio_codec.h) */  
-//    EVAL_AUDIO_Error_CallBack((uint32_t*)&pAddr);    
-    
     /* Clear the Interrupt flag */
     DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TE | AUDIO_MAL_DMA_FLAG_FE | \
                                         AUDIO_MAL_DMA_FLAG_DME);
@@ -588,11 +569,11 @@ void Audio_I2S_IRQHandler(void)
     if (CurrAudioInterface == AUDIO_INTERFACE_DAC)
     {
       /* Write data to the DAC interface */
-      DAC_SetChannel1Data(DAC_Align_12b_L, EVAL_AUDIO_GetSampleCallBack()); 
+      DAC_SetChannel1Data(DAC_Align_12b_L, 0); 
     }
     
     /* Send dummy data on I2S to avoid the underrun condition */
-    SPI_I2S_SendData(CODEC_I2S, EVAL_AUDIO_GetSampleCallBack()); 
+    SPI_I2S_SendData(CODEC_I2S, 0); 
   }
 }
 /*========================
@@ -808,7 +789,7 @@ static uint32_t Codec_Stop(uint32_t CodecPdwnMode)
 static uint32_t Codec_VolumeCtrl(uint8_t Volume)
 {
   uint32_t counter = 0;
-    printf("Codec: volume: %d \r\n", Volume);
+
   if (Volume > 0xE6)
   {
     /* Set the Master volume */
