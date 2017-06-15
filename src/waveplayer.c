@@ -24,6 +24,12 @@
 
 #include <string.h>
 
+#ifdef I2S_24BIT
+extern uint16_t sampleBuffer[((48*8) * 200) / 2];	//sample frequency (1 packet per ms) times format (bytes)
+#else
+extern uint16_t sampleBuffer[((48*4) * 300) / 2];	//sample frequency (1 packet per ms) times format (bytes)
+#endif
+
 //use just the minimum needed
 __IO uint8_t volume = 80;
 static __IO uint32_t TimingDelay;
@@ -42,6 +48,16 @@ int WavePlayerInit(uint32_t AudioFreq)
   EVAL_AUDIO_Init(OUTPUT_DEVICE_AUTO, volume, AudioFreq); 
 
   return 0;
+}
+
+/**
+* @brief  Calculates the remaining file size and new position of the pointer.
+* @param  None
+* @retval None
+*/
+void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size)
+{
+    EVAL_AUDIO_Play((uint16_t*)sampleBuffer, sizeof(sampleBuffer));
 }
 
 /*----------------------------------------------------------------------------*/

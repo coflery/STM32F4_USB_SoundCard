@@ -360,10 +360,10 @@ uint32_t EVAL_AUDIO_Play(uint16_t* pBuffer, uint32_t Size)
   Codec_Play();
   
   /* Update the Media layer and enable it for play */  
-  Audio_MAL_Play((uint32_t)pBuffer, (uint32_t)(DMA_MAX(AudioTotalSize)));
+  Audio_MAL_Play((uint32_t)pBuffer, (uint32_t)(DMA_MAX(Size/4)));
 
   /* Update the remaining number of data to be played */
-  AudioRemSize = AudioTotalSize - DMA_MAX(AudioTotalSize);
+  AudioRemSize = Size/2 - DMA_MAX(AudioTotalSize);
   
   /* Update the current audio pointer position */
   CurrentPos = pBuffer + DMA_MAX(AudioTotalSize);
@@ -465,7 +465,7 @@ static void Audio_MAL_IRQHandler(void)
   uint16_t *pAddr = (uint16_t *)CurrentPos;
   uint32_t Size = AudioRemSize;
 #endif /* AUDIO_MAL_MODE_NORMAL */
-  
+
 #ifdef AUDIO_MAL_DMA_IT_TC_EN
   /* Transfer complete interrupt */
   if (DMA_GetFlagStatus(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TC) != RESET)
@@ -482,7 +482,7 @@ static void Audio_MAL_IRQHandler(void)
       /* Re-Configure the buffer address and size */
       DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t) CurrentPos;
       DMA_InitStructure.DMA_BufferSize = (uint32_t) (DMA_MAX(AudioRemSize));
-            
+      
       /* Configure the DMA Stream with the new parameters */
       DMA_Init(AUDIO_MAL_DMA_STREAM, &DMA_InitStructure);
       
@@ -504,6 +504,7 @@ static void Audio_MAL_IRQHandler(void)
       DMA_Cmd(AUDIO_MAL_DMA_STREAM, DISABLE);   
       /* Clear the Interrupt flag */
       DMA_ClearFlag(AUDIO_MAL_DMA_STREAM, AUDIO_MAL_DMA_FLAG_TC);
+      EVAL_AUDIO_TransferComplete_CallBack((uint32_t)CurrentPos, 0); 
     }
     
  #elif defined(AUDIO_MAL_MODE_CIRCULAR)    

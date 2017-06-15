@@ -65,7 +65,7 @@
 /* For the DMA modes select the interrupt that will be used */
 #define AUDIO_MAL_DMA_IT_TC_EN        /* Uncomment this line to enable DMA Transfer Complete interrupt */
 /* #define AUDIO_MAL_DMA_IT_HT_EN */  /* Uncomment this line to enable DMA Half Transfer Complete interrupt */
-#define AUDIO_MAL_DMA_IT_TE_EN        /* Uncomment this line to enable DMA Transfer Error interrupt */
+/* #define AUDIO_MAL_DMA_IT_TE_EN */       /* Uncomment this line to enable DMA Transfer Error interrupt */
 
 /* Select the interrupt preemption priority and subpriority for the DMA interrupt */
 #define EVAL_AUDIO_IRQ_PREPRIO           0   /* Select the preemption priority level(0 is the highest) */
@@ -260,6 +260,7 @@ void DAC_Config(void);
 
 /* User Callbacks: user has to implement these functions in his code if
   they are needed. -----------------------------------------------------------*/
+void EVAL_AUDIO_TransferComplete_CallBack(uint32_t pBuffer, uint32_t Size);
 
 /* Codec_TIMEOUT_UserCallback() function is called whenever a timeout condition 
    occurs during communication (waiting on an event that doesn't occur, bus 
