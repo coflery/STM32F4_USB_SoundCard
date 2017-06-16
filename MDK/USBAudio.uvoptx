@@ -217,11 +217,6 @@
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>AudioRemSize</ItemText>
-        </Ww>
-        <Ww>
-          <count>3</count>
-          <WinNumber>1</WinNumber>
           <ItemText>DMA_InitStructure</ItemText>
         </Ww>
       </WatchWindow1>
