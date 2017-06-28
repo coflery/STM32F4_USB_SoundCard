@@ -91,8 +91,7 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
 
   #ifdef USE_ULPI_PHY // ULPI
   RCC_AHB1PeriphClockCmd( RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB |
-                         RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOH |
-                           RCC_AHB1Periph_GPIOI, ENABLE);
+                         RCC_AHB1Periph_GPIOC, ENABLE);
 
 
   GPIO_PinAFConfig(GPIOA,GPIO_PinSource3, GPIO_AF_OTG2_HS) ; // D0
@@ -104,8 +103,8 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
   GPIO_PinAFConfig(GPIOB,GPIO_PinSource11,GPIO_AF_OTG2_HS) ; // D4
   GPIO_PinAFConfig(GPIOB,GPIO_PinSource12,GPIO_AF_OTG2_HS) ; // D5
   GPIO_PinAFConfig(GPIOB,GPIO_PinSource13,GPIO_AF_OTG2_HS) ; // D6
-  GPIO_PinAFConfig(GPIOH,GPIO_PinSource4, GPIO_AF_OTG2_HS) ; // NXT
-  GPIO_PinAFConfig(GPIOI,GPIO_PinSource11,GPIO_AF_OTG2_HS) ; // DIR
+  GPIO_PinAFConfig(GPIOC,GPIO_PinSource3, GPIO_AF_OTG2_HS) ; // NXT
+  GPIO_PinAFConfig(GPIOC,GPIO_PinSource2, GPIO_AF_OTG2_HS) ; // DIR
   GPIO_PinAFConfig(GPIOC,GPIO_PinSource0, GPIO_AF_OTG2_HS) ; // STP
 
   // CLK
@@ -144,17 +143,17 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
   GPIO_Init(GPIOC, &GPIO_InitStructure);
 
   //NXT
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_Init(GPIOH, &GPIO_InitStructure);
+  GPIO_Init(GPIOC, &GPIO_InitStructure);
 
 
   //DIR
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11 ;
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 ;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_Init(GPIOI, &GPIO_InitStructure);
+  GPIO_Init(GPIOC, &GPIO_InitStructure);
 
 
   RCC_AHB1PeriphClockCmd( RCC_AHB1Periph_OTG_HS |

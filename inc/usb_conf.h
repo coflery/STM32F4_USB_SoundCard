@@ -53,6 +53,10 @@
  #define USB_OTG_FS_CORE
 #endif
 
+#ifdef USE_USB_OTG_HS
+ #define USB_OTG_HS_CORE
+#endif
+
 /*******************************************************************************
 *                      FIFO Size Configuration in Device mode
 *  
@@ -86,8 +90,37 @@
 *  (v) The FIFO is used optimally when used TxFIFOs are allocated in the top 
 *       of the FIFO.Ex: use EP1 and EP2 as IN instead of EP1 and EP3 as IN ones.
 *******************************************************************************/
- 
 
+/****************** USB OTG HS CONFIGURATION **********************************/ 
+#ifdef USB_OTG_HS_CORE
+ #define RX_FIFO_HS_SIZE                          512
+ #define TX0_FIFO_HS_SIZE                         512
+ #define TX1_FIFO_HS_SIZE                         512
+ #define TX2_FIFO_HS_SIZE                          0
+ #define TX3_FIFO_HS_SIZE                          0
+ #define TX4_FIFO_HS_SIZE                          0
+ #define TX5_FIFO_HS_SIZE                          0
+ #define TXH_NP_HS_FIFOSIZ                         96
+ #define TXH_P_HS_FIFOSIZ                          96
+
+ //#define USB_OTG_HS_LOW_PWR_MGMT_SUPPORT
+ //#define USB_OTG_HS_SOF_OUTPUT_ENABLED
+
+ //#define USB_OTG_INTERNAL_VBUS_ENABLED
+ #define USB_OTG_EXTERNAL_VBUS_ENABLED
+
+ #ifdef USE_ULPI_PHY
+  #define USB_OTG_ULPI_PHY_ENABLED
+ #endif
+ #ifdef USE_EMBEDDED_PHY
+   #define USB_OTG_EMBEDDED_PHY_ENABLED
+ #endif
+ #ifdef USE_I2C_PHY
+  #define USB_OTG_I2C_PHY_ENABLED
+ #endif
+// #define USB_OTG_HS_INTERNAL_DMA_ENABLED
+ #define USB_OTG_HS_DEDICATED_EP1_ENABLED
+#endif
 
 /****************** USB OTG FS CONFIGURATION **********************************/
 #ifdef USB_OTG_FS_CORE
