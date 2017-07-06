@@ -73,7 +73,11 @@
 
 /* AudioFreq * DataSize (HALF_WORD_BYTES bytes) * NumChannels (Stereo: 2) */
 /* ATT: make sure that the AUDIO_OUT_PACKET uses the largest value ! */
+#ifndef USE_USB_OTG_HS
 #define AUDIO_OUT_PACKET                              (uint32_t)(((USBD_AUDIO_FREQ  * 2 * HALF_WORD_BYTES)  /1000))
+#else
+#define AUDIO_OUT_PACKET                              (uint32_t)(((USBD_AUDIO_FREQ  * 2 * HALF_WORD_BYTES)  /8000))
+#endif
 
 /* Number of sub-packets in the audio transfer buffer. You can modify this value but always make sure
   that it is an even number and higher than 3 */
@@ -81,7 +85,7 @@
 /* Total size of the audio transfer buffer */
 #define TOTAL_OUT_BUF_SIZE                           ((uint32_t)(AUDIO_OUT_PACKET * OUT_PACKET_NUM))
 
-#define AUDIO_CONFIG_DESC_SIZE                        109
+#define AUDIO_CONFIG_DESC_SIZE                        145
 #define AUDIO_INTERFACE_DESC_SIZE                     9
 #define USB_AUDIO_DESC_SIZ                            0x09
 #define AUDIO_STANDARD_ENDPOINT_DESC_SIZE             0x09
@@ -92,8 +96,10 @@
 #define AUDIO_SUBCLASS_AUDIOCONTROL                   0x01
 #define AUDIO_SUBCLASS_AUDIOSTREAMING                 0x02
 #define AUDIO_PROTOCOL_UNDEFINED                      0x00
+#define AUDIO_IP_VERSION_02_00                        0x20
 #define AUDIO_STREAMING_GENERAL                       0x01
 #define AUDIO_STREAMING_FORMAT_TYPE                   0x02
+#define AUDIO_STREAMING_ENCODER                       0x03
 
 /* Audio Descriptor Types */
 #define AUDIO_INTERFACE_DESCRIPTOR_TYPE               0x24
@@ -104,6 +110,13 @@
 #define AUDIO_CONTROL_INPUT_TERMINAL                  0x02
 #define AUDIO_CONTROL_OUTPUT_TERMINAL                 0x03
 #define AUDIO_CONTROL_FEATURE_UNIT                    0x06
+#define AUDIO_CONTROL_CLOCK_SOURCE                    0x0A
+
+/* Audio Function Category Codes */
+#define AUDIO_DESKTOP_SPEAKER                         0x01
+#define AUDIO_HOME_THEATER                            0x02
+#define AUDIO_MICROPHONE                              0x03
+#define AUDIO_HEADSET                                 0x04
 
 #define AUDIO_INPUT_TERMINAL_DESC_SIZE                0x0C
 #define AUDIO_OUTPUT_TERMINAL_DESC_SIZE               0x09
@@ -112,12 +125,37 @@
 #define AUDIO_CONTROL_MUTE                            0x01
 #define AUDIO_CONTROL_VOLUME                          0x02
 
+/* UAC 2.0 */
+#define AUDIO_20_CLK_SOURCE_DESC_SIZE                 0x08
+#define AUDIO_20_IT_DESC_SIZE                         0x11
+#define AUDIO_20_OT_DESC_SIZE                         0x0C
+#define AUDIO_20_STREAMING_INTERFACE_DESC_SIZE        0x10
+
+#define AUDIO_20_CTL_MUTE_RO                          (0x01)
+#define AUDIO_20_CTL_VOLUME_RO                        (0x01<<2)
+
+#define AUDIO_20_STANDARD_ENDPOINT_DESC_SIZE          0x07
+#define AUDIO_20_STREAMING_ENDPOINT_DESC_SIZE         0x08
+
 #define AUDIO_FORMAT_TYPE_I                           0x01
+#define AUDIO_FORMAT_TYPE_II                          0x02
 #define AUDIO_FORMAT_TYPE_III                         0x03
+#define AUDIO_FORMAT_TYPE_IV                          0x04
 
 #define USB_ENDPOINT_TYPE_ISOCHRONOUS                 0x01
 #define USB_ENDPOINT_TYPE_ASYNCHRONOUS				  0x05
+#define USB_ENDPOINT_TYPE_ADAPTIVE                    0x09
+#define USB_ENDPOINT_TYPE_SYNCHRONOUS                 0x0D
 #define AUDIO_ENDPOINT_GENERAL                        0x01
+
+#define ENTITY_ID(wIndex)                             ((uint8_t)((wIndex & 0xFF00) >>8))
+#define INTERFACE_ID(wIndex)                          ((uint8_t)(wIndex & 0x00FF))
+#define CS_ID(wValue)                                 ((uint8_t)((wValue & 0xFF00) >>8))
+#define CN_ID(wValue)                                 ((uint8_t)(wValue & 0x00FF))
+
+#define AUDIO_REQ_CLASS_TYPE_MASK                     0x0F
+#define AUDIO_REQ_INTERFACE                           0x01
+#define AUDIO_REQ_ENDPOINT                            0x02
 
 #define AUDIO_REQ_GET_MASK                            0x80
 #define AUDIO_REQ_GET_CUR                             0x81
@@ -130,7 +168,19 @@
 #define AUDIO_REQ_SET_MAX                             0x03
 #define AUDIO_REQ_SET_RES                             0x04
 
-#define AUDIO_OUT_STREAMING_CTRL                      0x02
+#define AUDIO_REQ_CUR                                 0x01
+#define AUDIO_REQ_RANGE                               0x02
+#define AUDIO_REQ_MEM                                 0x03
+
+#define AUDIO_IT_ID                                   0x01
+#define AUDIO_FU_ID                                   0x02
+#define AUDIO_OT_ID                                   0x03
+#define AUDIO_CLK_ID                                  0x04
+
+/* Clock Source Control Selectors */
+#define CS_CONTROL_UNDEFINED                          0x00
+#define CS_SAM_FREQ_CONTROL                           0x01
+#define CS_CLOCK_VALID_CONTROL                        0x02
 
 /**
   * @}
@@ -159,8 +209,14 @@ typedef struct _Audio_Fops
   * @{
   */ 
 
+#ifndef USE_USB_OTG_HS
 #define AUDIO_PACKET_SZE(frq)          (uint8_t)(((frq * 2 * HALF_WORD_BYTES)/1000) & 0xFF), \
                                        (uint8_t)((((frq * 2 * HALF_WORD_BYTES)/1000) >> 8) & 0xFF)
+#else
+#define AUDIO_PACKET_SZE(frq)          (uint8_t)(((frq * 2 * HALF_WORD_BYTES)/8000) & 0xFF), \
+                                       (uint8_t)((((frq * 2 * HALF_WORD_BYTES)/8000) >> 8) & 0xFF)
+#endif
+
 #define SAMPLE_FREQ(frq)               (uint8_t)(frq), (uint8_t)((frq >> 8)), (uint8_t)((frq >> 16))
 /**
   * @}

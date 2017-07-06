@@ -371,7 +371,7 @@
             <vShortWch>0</vShortWch>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>USE_STDPERIPH_DRIVER,USE_USB_OTG_FS,STM32F4XX,USB_AUDIO</Define>
+              <Define>USE_STDPERIPH_DRIVER,USE_USB_OTG_HS,USE_ULPI_PHY,STM32F4XX,USB_AUDIO</Define>
               <Undefine></Undefine>
               <IncludePath>..\inc;..\Libraries\STM32F4xx_StdPeriph_Driver\inc;..\Libraries\CMSIS\ST\STM32F4xx\Include;..\Utilities\STM32F4-Discovery;..\usb;..\Libraries\CMSIS\Include</IncludePath>
             </VariousControls>
@@ -462,16 +462,6 @@
               <FilePath>..\usb\usb_dcd_int.c</FilePath>
             </File>
             <File>
-              <FileName>usbd_audio_core.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\usb\usbd_audio_core.c</FilePath>
-            </File>
-            <File>
-              <FileName>usbd_audio_out_if.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\usb\usbd_audio_out_if.c</FilePath>
-            </File>
-            <File>
               <FileName>usbd_core.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\usb\usbd_core.c</FilePath>
@@ -495,6 +485,16 @@
               <FileName>usbd_usr.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\usb\usbd_usr.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbd_audio2_core.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\usb\usbd_audio2_core.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbd_audio2_out_if.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\usb\usbd_audio2_out_if.c</FilePath>
             </File>
           </Files>
         </Group>
