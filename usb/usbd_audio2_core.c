@@ -155,8 +155,8 @@ static uint8_t usbd_audio_CfgDesc[AUDIO_CONFIG_DESC_SIZE] =
   AUDIO_CONTROL_FEATURE_UNIT,           /* bDescriptorSubtype */
   AUDIO_FU_ID,                          /* bUnitID */
   AUDIO_IT_ID,                          /* bSourceID */
-  AUDIO_20_CTL_MUTE_RO                  /* bmaControls(0) */
-  | AUDIO_20_CTL_VOLUME_RO,
+  AUDIO_20_CTL_MUTE(CONTROL_BITMAP_PROG)/* bmaControls(0) */
+  | AUDIO_20_CTL_VOLUME(CONTROL_BITMAP_PROG),
   0x00,
   0x00,
   0x00,
@@ -176,8 +176,8 @@ static uint8_t usbd_audio_CfgDesc[AUDIO_CONFIG_DESC_SIZE] =
   AUDIO_INTERFACE_DESCRIPTOR_TYPE,      /* bDescriptorType */
   AUDIO_CONTROL_OUTPUT_TERMINAL,        /* bDescriptorSubtype */
   AUDIO_OT_ID,                          /* bTerminalID */
-  0x01,                                 /* wTerminalType  0x0301: Speaker, 0x0302: Headphone*/
-  0x01,
+  0x02,                                 /* wTerminalType  0x0301: Speaker, 0x0302: Headphone*/
+  0x03,
   0x00,                                 /* bAssocTerminal */
   AUDIO_FU_ID,                          /* bSourceID */
   AUDIO_CLK_ID,                         /* bCSourceID */
@@ -608,11 +608,11 @@ static void AUDIO_Req_ClockSource(void *pdev, USB_SETUP_REQ *req)
                             0x00,
                             0x00,
                             0x00,           /* dMAX(1) */
-                            0x77,
-                            0x01,
+                            0xEE,
+                            0x02,
                             0x00,
-                            0xE0,           /* dRES(1) */
-                            0x2E,
+                            0x80,           /* dRES(1) */
+                            0xBB,
                             0x00,
                             0x00
                         };
@@ -655,26 +655,15 @@ static void AUDIO_Req_FeatureUnit(void *pdev, USB_SETUP_REQ *req)
   
   memset(AudioCtl, 0, sizeof(AudioCtl));
   if (bCS == AUDIO_CONTROL_VOLUME && bCN == 0) {
+    //Layout 2 Parameter
     switch (req->bRequest) {
-        case AUDIO_REQ_GET_CUR:
-          AudioCtl[0] = 50;
-          break;
-
-        case AUDIO_REQ_GET_MAX:
-          AudioCtl[0] = 100;
-          break;
-        
-        case AUDIO_REQ_GET_MIN:
-          AudioCtl[0] = 0;
-          break;
-        
-        case AUDIO_REQ_GET_RES:
-          AudioCtl[0] = 1;
-          break;
-        
-        case AUDIO_REQ_SET_CUR:
-          if (req->wLength)
-          {
+        case AUDIO_REQ_CUR:
+          if (req->bmRequest & AUDIO_REQ_GET_MASK) {
+            //GET
+            AudioCtl[0] = 50;
+            USBD_CtlSendData (pdev, AudioCtl, req->wLength);
+          } else {
+            //SET
             /* Prepare the reception of the buffer over EP0 */
             USBD_CtlPrepareRx (pdev, 
                     AudioCtl,
@@ -685,55 +674,59 @@ static void AUDIO_Req_FeatureUnit(void *pdev, USB_SETUP_REQ *req)
             AudioCtlCmd = AUDIO_REQ_SET_CUR;     /* Set the request value */
             AudioCtlLen = req->wLength;          /* Set the request data length */
             AudioCtlCS  = bCS;
-            AudioCtlUnit = HIBYTE(req->wIndex);  /* Set the request target unit */
+            AudioCtlUnit = HIBYTE(req->wIndex);  /* Set the request target unit */            
           }
-          break;  
-
-        case AUDIO_REQ_SET_MAX:
-          break;
-        
-        case AUDIO_REQ_SET_MIN:
           break;
 
-        case AUDIO_REQ_SET_RES:
+        case AUDIO_REQ_RANGE:
+          if (req->bmRequest & AUDIO_REQ_GET_MASK) {
+            //GET
+            AudioCtl[0] = 1;    //wNumSubRanges
+            AudioCtl[1] = 0;
+            AudioCtl[2] = 0;    //wMIN(1)
+            AudioCtl[3] = 0;
+            AudioCtl[4] = 100;  //wMAX(1)
+            AudioCtl[5] = 0;
+            AudioCtl[6] = 1;    //wRES(1)
+            AudioCtl[7] = 0;
+            USBD_CtlSendData (pdev, AudioCtl, req->wLength);
+          } else {
+            //SET
+            USBD_CtlError (pdev, req);
+          }
           break;
-        
+
         default:
           USBD_CtlError (pdev, req);
           return;
     }
   } else if (bCS == AUDIO_CONTROL_MUTE && bCN == 0) {
+    //Layout 2 Parameter
     switch (req->bRequest) {
-        case AUDIO_REQ_GET_CUR:
-          AudioCtl[0] = 0;
-          break;
-        case AUDIO_REQ_SET_CUR:
-          if (req->wLength)
-          {
-            /* Prepare the reception of the buffer over EP0 */
-            USBD_CtlPrepareRx (pdev, 
-                    AudioCtl,
-                    req->wLength);
-    
-            /* Set the global variables indicating current request and its length 
-            to the function usbd_audio_EP0_RxReady() which will process the request */
-            AudioCtlCmd = AUDIO_REQ_SET_CUR;     /* Set the request value */
-            AudioCtlLen = req->wLength;          /* Set the request data length */
-            AudioCtlCS  = bCS;
-            AudioCtlUnit = HIBYTE(req->wIndex);  /* Set the request target unit */
-          }
-          break;
-        
+        case AUDIO_REQ_CUR:
+            if (req->bmRequest & AUDIO_REQ_GET_MASK) {
+                //GET
+                AudioCtl[0] = 0; /* bCUR */
+                USBD_CtlSendData (pdev, AudioCtl, req->wLength);
+            } else {
+                //SET
+                /* Prepare the reception of the buffer over EP0 */
+                USBD_CtlPrepareRx (pdev, 
+                        AudioCtl,
+                        req->wLength);
+                /* Set the global variables indicating current request and its length 
+                to the function usbd_audio_EP0_RxReady() which will process the request */
+                AudioCtlCmd = AUDIO_REQ_SET_CUR;     /* Set the request value */
+                AudioCtlLen = req->wLength;          /* Set the request data length */
+                AudioCtlCS  = bCS;
+                AudioCtlUnit = HIBYTE(req->wIndex);  /* Set the request target unit */
+            }
+            break;
+
         default:
           USBD_CtlError (pdev, req);
           return;
     }
-  }
-
-  if (req->bRequest & AUDIO_REQ_GET_MASK) {
-      USBD_CtlSendData (pdev, 
-                        AudioCtl,
-                        req->wLength);    
   }
 }
 

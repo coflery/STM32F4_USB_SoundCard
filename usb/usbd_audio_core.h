@@ -131,8 +131,12 @@
 #define AUDIO_20_OT_DESC_SIZE                         0x0C
 #define AUDIO_20_STREAMING_INTERFACE_DESC_SIZE        0x10
 
-#define AUDIO_20_CTL_MUTE_RO                          (0x01)
-#define AUDIO_20_CTL_VOLUME_RO                        (0x01<<2)
+#define CONTROL_BITMAP_NONE                           (0x00)
+#define CONTROL_BITMAP_RO                             (0x01)
+#define CONTROL_BITMAP_PROG                           (0x03)
+
+#define AUDIO_20_CTL_MUTE(bmaControl)                 (bmaControl)
+#define AUDIO_20_CTL_VOLUME(bmaControl)               (bmaControl<<2)
 
 #define AUDIO_20_STANDARD_ENDPOINT_DESC_SIZE          0x07
 #define AUDIO_20_STREAMING_ENDPOINT_DESC_SIZE         0x08
