@@ -123,7 +123,7 @@ static uint8_t usbd_audio_CfgDesc[AUDIO_CONFIG_DESC_SIZE] =
   AUDIO_INTERFACE_DESCRIPTOR_TYPE,      /* bDescriptorType */
   AUDIO_CONTROL_CLOCK_SOURCE,           /* bDescriptorSubtype */
   AUDIO_CLK_ID,                         /* bClockID */
-  0x01,                                 /* bmAttributes */
+  0x03,                                 /* bmAttributes */
   0x07,                                 /* bmControls TODO */
   0x00,                                 /* bAssocTerminal */
   0x00,                                 /* iClockSource */
@@ -600,25 +600,20 @@ static void AUDIO_Req_ClockSource(void *pdev, USB_SETUP_REQ *req)
                 case AUDIO_REQ_RANGE:
                     if (req->bmRequest & AUDIO_REQ_GET_MASK) {
                         //Get Layout 3 parameter block
-                        uint8_t para_block[14] = {
-                            0x01,           /* wNumSubRanges */
-                            0x00,
-                            0x80,           /* dMIN(1) */
-                            0xBB,
-                            0x00,
-                            0x00,
-                            0x00,           /* dMAX(1) */
-                            0xEE,
-                            0x02,
-                            0x00,
-                            0x80,           /* dRES(1) */
-                            0xBB,
-                            0x00,
-                            0x00
+                        uint8_t para_block[] = {
+                            SAMPLE_FREQ_NUM(2),                       /* wNumSubRanges */
+                            
+                            SAMPLE_FREQ_4B(I2S_AudioFreq_48k),        /* dMIN(1) */
+                            SAMPLE_FREQ_4B(I2S_AudioFreq_48k),        /* dMAX(1) */
+                            SAMPLE_FREQ_4B(0x00),                     /* dRES(1) */
+                            
+                            SAMPLE_FREQ_4B(I2S_AudioFreq_96k),        /* dMIN(2) */
+                            SAMPLE_FREQ_4B(I2S_AudioFreq_96k),        /* dMAX(2) */
+                            SAMPLE_FREQ_4B(0x00),                     /* dRES(2) */
                         };
                         USBD_CtlSendData(pdev, 
                             para_block,
-                            sizeof(para_block));
+                            req->wLength);
                     } else {
                         //Set
                     }

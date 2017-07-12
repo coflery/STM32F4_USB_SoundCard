@@ -9,8 +9,8 @@ I fork it and add my own features.
 2. UAC1.0 basic functions(IT - FU - OT).
 3. USB high speed with USB3300.
 4. UAC2.0 basic functions(IT - FU - OT).
+5. multi-samplerate support
 
 ###TODO List:
-1. multi-samplerate support
-2. async audio on UAC2.0
-3. .......
+1. async audio on UAC2.0
+2. .......

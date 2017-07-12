@@ -189,7 +189,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name>(105=-1,-1,-1,-1,0)</Name>
+          <Name>(105=-1216,185,-547,532,0)</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -217,7 +217,7 @@
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>DMA_InitStructure</ItemText>
+          <ItemText>AudioCtl</ItemText>
         </Ww>
         <Ww>
           <count>3</count>

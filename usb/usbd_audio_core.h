@@ -60,7 +60,7 @@
 #define SAMPLE_BITS								 24			//24 bit per channel
 #else
 //works: 48 KHz, 16bit - mode 0
-#define	USBD_AUDIO_FREQ								48000		//96000 : bits per seconds
+#define	USBD_AUDIO_FREQ								96000		//96000 : bits per seconds
 #define HALF_WORD_BYTES								  2			//2 half word (one channel)
 #define SAMPLE_BITS									 16			//16 bit per channel
 //but 96 KHz, 24bit does not work on Windows, 96 KHz, 16bit is OK
@@ -221,7 +221,10 @@ typedef struct _Audio_Fops
                                        (uint8_t)((((frq * 2 * HALF_WORD_BYTES)/8000) >> 8) & 0xFF)
 #endif
 
+#define SAMPLE_FREQ_NUM(num)           (uint8_t)(num), (uint8_t)((num >> 8))
 #define SAMPLE_FREQ(frq)               (uint8_t)(frq), (uint8_t)((frq >> 8)), (uint8_t)((frq >> 16))
+#define SAMPLE_FREQ_4B(frq)            (uint8_t)(frq), (uint8_t)((frq >> 8)), \
+                                       (uint8_t)((frq >> 16)), (uint8_t)((frq >> 24))
 /**
   * @}
   */ 
